@@ -1,5 +1,23 @@
 #  making and API calls to Claude making use of PYTHON  # 
+"""This following lines of code are for if one want to make use of Anthropic_API_key...
+#from dotenv import load_dotenv
+#from anthropic import Anthropic
+#load_dotenv()
+#client = Anthropic()
+model = "name of anthropic model that u would like to use"
+#reponse = client.messages.create(
+    model=model
+    max_tokens=1000
+    messages=[
+    {
+    "role": "user",
+    "content": "what is devops?"
+    }
+]
+)
 
+print(response.content[0].text)
+"""
 
 # import neccessary packages #
 
