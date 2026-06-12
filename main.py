@@ -55,5 +55,6 @@ response = client.chat.completions.create(
         ]
 )
 
-
+print('__' * 125)
 print(response.choices[0].message.content)
+print('__' * 125)
