@@ -31,6 +31,21 @@ from anthropic import Anthropic
 
 from openai import OpenAI
 
+"""creating helper functions that would help to managge conversation better.
+in the context of multi-turn conversation"""
+
+#ADD USER MESSAGE FUNCTION
+def add_user_message(messages, text):
+    user_message = {"role": "user", "content": text}
+    messages.append(user_message)
+
+
+#ADD ASSISTANT(AI) MESSAGE FUNCTION
+def add_assisntant_message(messages, text):
+    assistant_message = {"role": "assistant", "content": text}
+    messages.append(assistant_message)
+
+
 # Load the API KEY from the .env file
 load_dotenv()
 
@@ -46,7 +61,7 @@ model = "anthropic/claude-3.5-haiku"
 
 
 # now making a first request
-
+##############################
 response = client.chat.completions.create(
     model = model,
     max_tokens = 1000,
@@ -56,5 +71,6 @@ response = client.chat.completions.create(
 )
 
 print('__' * 125)
+#print the result
 print(response.choices[0].message.content)
 print('__' * 125)
