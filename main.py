@@ -46,6 +46,19 @@ def add_assisntant_message(messages, text):
     messages.append(assistant_message)
 
 
+
+#now creating the chat function that would make use of the add_user msg and add_assistant msg
+
+def chat(messages):
+    message = client.chat.completions.create(
+        model = model,
+        max_tokens = 1000,
+        messages = messages,
+    )
+
+    return message.content[0].text
+
+
 # Load the API KEY from the .env file
 load_dotenv()
 
