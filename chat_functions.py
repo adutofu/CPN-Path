@@ -74,7 +74,7 @@ def chat(messages):
 
 
 # THIS WORKS FOR ONLY OPENROUTER AI
-def chat(messages, system=None):
+def chat(messages, system=None, temperature=1.0):
     if system:
         messages = [{"role": "system", "content": system}] + messages
     
@@ -82,6 +82,7 @@ def chat(messages, system=None):
             "model": model,
             "max_tokens" : 1000,
             "messages" : messages,
+            "temperature" : temperature
     } 
     
     message = client.chat.completions.create(**params)
