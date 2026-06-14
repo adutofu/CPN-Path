@@ -27,7 +27,13 @@ while True:
 
     # get AI response with chat function
 
-    answer = chat(messages)
+    # get claude response with syestem promt, which allow u to customize the AI response
+    
+    system = """focus more on professional and dispritive defination. but still
+    make thing explanatory to understand the concept better."""
+
+    answer = chat(messages, system=system)
+
 
     # add the answer to the list of generated text
     add_assistant_message(messages, answer)

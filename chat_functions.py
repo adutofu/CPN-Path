@@ -75,11 +75,17 @@ def chat(messages):
 
 # THIS WORKS FOR ONLY OPENROUTER AI
 def chat(messages, system=None):
-    message = client.chat.completions.create(
-        model = model,
-        max_tokens = 1000,
-        messages = messages,
-    )
+    if system:
+        messages = [{"role": "system", "content": system}] + messages
+    
+    params = { 
+            "model": model,
+            "max_tokens" : 1000,
+            "messages" : messages,
+    } 
+    
+    message = client.chat.completions.create(**params)
 
+    
     return message.choices[0].message.content
 
