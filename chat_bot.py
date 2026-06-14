@@ -32,7 +32,7 @@ while True:
     system = """focus more on professional and dispritive defination. but still
     make thing explanatory to understand the concept better."""
 
-    answer = chat(messages, system=system)
+    answer = chat(messages, system=system, temperature=0.0)
 
 
     # add the answer to the list of generated text

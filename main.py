@@ -30,7 +30,7 @@ answer = chat(messages)
 system = """focus more on professional and dispritive defination. but still
 make thing explanatory to understand the concept better."""
 
-answer = chat(messages, system=system)
+answer = chat(messages, system=system, temperature=0.8)
 
 print(answer) # you have to use the print function on the first answer gotten, to view it before appending it to messages
 
