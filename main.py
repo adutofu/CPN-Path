@@ -22,8 +22,15 @@ messages = []
 # add the initial user question
 add_user_message(messages, "what is devops and diffiferent btween it and full stack developer")
 
-# get claude haiku response
+# get claude haiku response, without syestem promt
 answer = chat(messages)
+
+
+# get claude response with syestem promt, which allow u to customize the AI response
+system = """focus more on professional and dispritive defination. but still
+make thing explanatory to understand the concept better."""
+
+answer = chat(messages, system=system)
 
 print(answer) # you have to use the print function on the first answer gotten, to view it before appending it to messages
 

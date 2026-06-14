@@ -74,7 +74,7 @@ def chat(messages):
 
 
 # THIS WORKS FOR ONLY OPENROUTER AI
-def chat(messages):
+def chat(messages, system=None):
     message = client.chat.completions.create(
         model = model,
         max_tokens = 1000,
