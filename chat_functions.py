@@ -83,7 +83,7 @@ def chat(messages, system=None, temperature=1.0):
             "max_tokens" : 1000,
             "messages" : messages,
             "temperature" : temperature
-    } 
+    }  
     
     message = client.chat.completions.create(**params)
 

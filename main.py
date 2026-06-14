@@ -10,6 +10,9 @@ from chat_functions import add_assistant_message
 # IMPORT THE chat FUNCTION
 from chat_functions import chat
 
+# IMPORT THE client AND model FROM chat_functions
+from chat_functions import client, model
+
 
 print('__' * 125)
 # print the result
@@ -17,13 +20,27 @@ print('__' * 125)
 
 
 # start with an empty message list
+#messages = []
+
+
 messages = []
 
+add_user_message(messages, "Write a 1 sentence description of a fake database")
+
+stream = client.chat.completions.create(
+    model=model,
+    max_tokens=1000,
+    messages=messages,
+    stream=True
+)
+
+for event in stream:
+    print(event)
 # add the initial user question
 add_user_message(messages, "what is devops and diffiferent btween it and full stack developer")
 
 # get claude haiku response, without syestem promt
-answer = chat(messages)
+#answer = chat(messages)
 
 
 # get claude response with syestem promt, which allow u to customize the AI response
@@ -37,12 +54,16 @@ print(answer) # you have to use the print function on the first answer gotten, t
 print('__' * 125)
 
 # add claude's response to the conversation histroy
-add_assistant_message(messages, answer)
+#add_assistant_message(messages, answer)
 
 # add a follow up question
-add_user_message(messages, "in regard the earlier question asked, what is AI engineering")
+#add_user_message(messages, "in regard the earlier question asked, what is AI engineering")
 final_answer = chat(messages)
 
 print(final_answer) # this help u to print the finial response.
 
 print('__' * 125)
+
+
+
+
