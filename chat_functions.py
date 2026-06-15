@@ -74,9 +74,11 @@ def chat(messages):
 
 
 # THIS WORKS FOR ONLY OPENROUTER AI
-def chat(messages, system=None, temperature=1.0):
+def chat(messages, system=None, temperature=1.0, stop_sequences=None):
     if system:
         messages = [{"role": "system", "content": system}] + messages
+    
+    
     
     params = { 
             "model": model,
@@ -85,6 +87,10 @@ def chat(messages, system=None, temperature=1.0):
             "temperature" : temperature
     }  
     
+    if stop_sequences: # you make use of the stop_sequence once the param dictionary has being created and not after
+        params["stop"] = stop_sequences
+
+
     message = client.chat.completions.create(**params)
 
     
