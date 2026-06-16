@@ -37,8 +37,6 @@ pass
 final_message = stream.get_final_message()"""
 
 
-
-
 # Now make use of a while loop, this keeps the chat bot active untill u interrupt it
 
 while True:
