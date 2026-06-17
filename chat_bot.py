@@ -11,7 +11,7 @@ from chat_functions import chat
 from chat_functions import client,  model
 
 
-# get claude response with syestem promt, which allow u to customize the AI response
+# get claude response with system promt, which allow u to customize the AI response
 # we start by defining the system varabile
     
 system = """focus more on professional and dispritive defination. but still
