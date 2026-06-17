@@ -1,23 +1,23 @@
-# IMPORT THE add_user_message FUNCTION
+"""
+This script handles the creation of a local evaluation dataset by prompting
+the AI to generate a list of AWS-related programming tasks.
+"""
+
+# Import chat management and messaging functions from the helper module
 from chat_functions import add_user_message
-
-# IMPORT THE add_assistant_message FUNCTION
 from chat_functions import add_assistant_message
-
-# IMPORT THE chat FUNCTION
 from chat_functions import chat
-
-# IMPORT THE client & model from the CHAT_FUNCTION
-from chat_functions import client,  model
-
+# Import connection configuration and the main generation function
+from chat_functions import client, model
 from chat_functions import generate_dataset
 
 import json
 
+# Execute the dataset generation.
+# This function handles the LLM request and returns a parsed JSON list.
 dataset = generate_dataset()
-#print(dataset)
 
+# Persist the dataset to a local JSON file. 
+# Storing the tasks allows for repeatable evaluation without re-generating data.
 with open('dataset.json', 'w') as f:
     json.dump(dataset, f, indent=2)
-
-
