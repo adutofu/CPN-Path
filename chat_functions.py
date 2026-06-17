@@ -33,6 +33,7 @@ import json
 
 from anthropic import Anthropic # Import the Anthropic client for interacting with Anthropic models.
 
+from statistics import mean
 
 # Load the API KEY from the .env file
 load_dotenv()
@@ -48,7 +49,7 @@ client = Anthropic(
 # Using a specific Anthropic model identifier.
 # Examples: "claude-3-opus-20240229", "claude-3-sonnet-20240229", "claude-3-haiku-20240307"
 # For the latest models, check Anthropic's documentation.
-model = "claude-3-5-sonnet-20240620" # Using Claude 3.5 Sonnet as a capable and cost-effective option.
+model = "claude-haiku-20231024-5" # Using Claude Haiku 4.5 as a capable and cost-effective option.
 
 
 
@@ -81,7 +82,9 @@ def chat(messages, system=None, temperature=1.0, stop_sequences=None):
         "model": model, # The specific Anthropic model to use.
         "max_tokens": 1000, # Maximum number of tokens to generate in the response.
         "messages": messages, # The conversation history, a list of message dictionaries.
-        "temperature": temperature # Controls the randomness of the model's output. Higher values mean more random.
+        "temperature": temperature, # Controls the randomness of the model's output. Higher values mean more random.
+        "stop_sequences": stop_sequences,
+         
     }
 
     # If a system prompt is provided, add it to the parameters.
@@ -157,8 +160,8 @@ Please generate 3 objects.
     # then return the valrable data to the function
     return json.loads(text)
 
-# CREATING OF THE GRADER FUNCTION & we are making use of a model grader, THAT WOULD BE USED IN THE run_eval function
 
+# CREATING OF THE GRADER FUNCTION & we are making use of a model grader, THAT WOULD BE USED IN THE run_eval function
 def grade_by_model(test_case, output):
     # This function implements the 'LLM-as-a-judge' pattern.
     # It leverages a highly capable model to act as an expert reviewer,
@@ -235,6 +238,7 @@ def run_eval(dataset):
     return results
 
 
+# FUNCTION TO EXECUTE A SINGLE TEST CASE AND GRADE THE OUTPUT
 def run_test_case(test_case):
     """
     Executes a single test case by calling the AI with the prompt and then grades the response.
@@ -248,14 +252,22 @@ def run_test_case(test_case):
     # Call the run_prompt function to get the AI's response for the given test case.
     output = run_prompt(test_case)
 
+    # TODO - replace with real grading logic
+    # Currently, a placeholder score of 10 is assigned. This should be replaced
+    # with actual logic to evaluate the 'output' against expected criteria.
+    score = model_grade["score"]
+
     # Perform the "LLM-as-a-judge" evaluation using the grader function.
     # This replaces the hardcoded placeholder with dynamic AI evaluation.
-    evaluation = grade_by_model(test_case, output)
+    model_grade = grade_by_model(test_case, output)
+    reasoning = model_grade["reasoning"]
 
     return {
         "output": output,
+        "test_case": test_case, # Corrected typo from "tast_case" to "test_case".
+        "score": score,
         "test_case": test_case,
-        "evaluation": evaluation
+        "reasoning": reasoning
     }
 
 # Defines the `run_prompt` function, which merges a generic prompt with a specific test case.
