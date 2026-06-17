@@ -157,3 +157,29 @@ Please generate 3 objects.
     # then return the valrable data to the function
     return json.loads(text)
     
+# Defines the `run_prompt` function, which merges a generic prompt with a specific test case.
+# This function is designed to send a task to the AI and retrieve its solution.
+def run_prompt(test_case):
+    """
+    Constructs a prompt for the AI based on a given test case and retrieves the AI's response.
+
+    Args:
+        test_case (dict): A dictionary containing details of the task, typically with a "task" key.
+
+    Returns:
+        str: The AI's generated response to the task.
+    """
+    # Formulate the prompt by embedding the test case's task description.
+    prompt = f"""
+please solve the following task:
+
+{test_case["task"]}
+"""
+    # Initialize an empty list to hold the conversation messages for this specific interaction.
+    messages = []
+    # Add the constructed prompt as a user message to the conversation history.
+    add_user_message(messages, prompt)
+    # Send the messages to the AI model and get its response.
+    output = chat(messages)
+    # Return the AI's output.
+    return output
