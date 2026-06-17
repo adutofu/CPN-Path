@@ -157,6 +157,21 @@ Please generate 3 objects.
     # then return the valrable data to the function
     return json.loads(text)
     
+def run_eval(dataset):
+    """Loads the dataset and calls run_test for each test case."""
+    results = []
+    for test_case in dataset:
+        result = run_test_case(test_case)
+        results.append(result)
+    return results
+
+
+
+
+
+
+
+
 # Defines the `run_prompt` function, which merges a generic prompt with a specific test case.
 # This function is designed to send a task to the AI and retrieve its solution.
 def run_prompt(test_case):
@@ -183,3 +198,5 @@ please solve the following task:
     output = chat(messages)
     # Return the AI's output.
     return output
+
+
