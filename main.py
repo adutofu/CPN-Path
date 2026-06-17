@@ -13,6 +13,15 @@ from chat_functions import chat
 # IMPORT THE client AND model FROM chat_functions
 from chat_functions import client, model
 
+# IMPORT the promt evaluation pipeline functions
+from chat_functions import run_eval, run_test_case, run_prompt
+
+
+import json
+
+
+
+
 
 print('__' * 125)
 # print the result
@@ -82,3 +91,13 @@ final_answer = chat(messages)
 print(final_answer) # this help u to print the finial response.
 
 print('__' * 125)
+
+
+# Promt evealuation pipline execution
+
+with open('dataset.json', 'r') as f:
+    dataset = json.load(f)
+
+results = run_eval(dataset)
+
+print(json.dumps(results, indent=2))
