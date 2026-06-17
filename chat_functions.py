@@ -157,6 +157,62 @@ Please generate 3 objects.
     # then return the valrable data to the function
     return json.loads(text)
 
+# CREATING OF THE GRADER FUNCTION & we are making use of a model grader, THAT WOULD BE USED IN THE run_eval function
+
+def grade_by_model(test_case, output):
+    # This function implements the 'LLM-as-a-judge' pattern.
+    # It leverages a highly capable model to act as an expert reviewer,
+    # providing structured feedback and a numerical score for the AI's output.
+    
+    # 1. Define a detailed evaluation prompt using XML-like tags to clearly 
+    # delineate the original task from the AI-generated solution.
+    eval_prompt = f"""
+you are and expert AWS code reviewr. your task is to evaluate the following AI_generated solution.
+
+Original Task:
+<task>
+{test_case["task"]}
+</task>
+
+AI Generated Solution:
+<solution>
+{output}
+</solution>
+
+Output Format
+Provide your evaluation as a structured JSON object with the following fields, in this specific order:
+- "strengths": An array of 1-3 key strengths
+- "weaknesses": An array of 1-3 key areas for improvement
+- "reasoning": A concise explanation of your overall assessment
+- "score": A number between 1-10
+
+Respond with JSON. Keep your response concise and direct.
+Example response shape:
+{{
+    "strengths": string[],
+    "weaknesses": string[],
+    "reasoning": string,
+    "score": number
+}}
+    """
+
+    # 2. Build the message history for the evaluation request.
+    messages = []
+    add_user_message(messages, eval_prompt)
+    
+    # 3. Use 'pre-filling' to force the assistant to start with a JSON block.
+    # This significantly improves reliability by ensuring the response begins with data.
+    add_assistant_message(messages, "```json")
+    
+    # 4. Call the LLM and use a stop sequence to halt generation at the end of the JSON block.
+    eval_text = chat(messages, stop_sequences=["```"])
+    
+    # 5. Deserialize the JSON string into a structured Python dictionary.
+    return json.loads(eval_text)
+
+
+
+
 
 def run_eval(dataset):
     """
@@ -192,15 +248,14 @@ def run_test_case(test_case):
     # Call the run_prompt function to get the AI's response for the given test case.
     output = run_prompt(test_case)
 
-    # TODO - replace with real grading logic
-    # Currently, a placeholder score of 10 is assigned. This should be replaced
-    # with actual logic to evaluate the 'output' against expected criteria.
-    score = 10
+    # Perform the "LLM-as-a-judge" evaluation using the grader function.
+    # This replaces the hardcoded placeholder with dynamic AI evaluation.
+    evaluation = grade_by_model(test_case, output)
 
     return {
         "output": output,
-        "test_case": test_case, # Corrected typo from "tast_case" to "test_case".
-        "score": score
+        "test_case": test_case,
+        "evaluation": evaluation
     }
 
 # Defines the `run_prompt` function, which merges a generic prompt with a specific test case.
