@@ -31,21 +31,24 @@ import os # this is because we want to make use of another API key
 
 import json
 
-from openai import OpenAI
+from anthropic import Anthropic # Import the Anthropic client for interacting with Anthropic models.
 
 
 # Load the API KEY from the .env file
 load_dotenv()
 
-# Create the client - it automatically reads ANTHROPIC_API_KEY from the environment
-client = OpenAI(
-    api_key=os.environ.get("OPENROUTER_API_KEY"),
-    base_url="https://openrouter.ai/api/v1",
+# Create the Anthropic client - it automatically reads ANTHROPIC_API_KEY from the environment.
+# Ensure you have ANTHROPIC_API_KEY set in your .env file.
+client = Anthropic(
+    api_key=os.environ.get("ANTHROPIC_API_KEY"), # Anthropic client automatically looks for ANTHROPIC_API_KEY.
 )
 
 
 # select the claude model you would like to use
-model = "anthropic/claude-3.5-haiku"
+# Using a specific Anthropic model identifier.
+# Examples: "claude-3-opus-20240229", "claude-3-sonnet-20240229", "claude-3-haiku-20240307"
+# For the latest models, check Anthropic's documentation.
+model = "claude-3-5-sonnet-20240620" # Using Claude 3.5 Sonnet as a capable and cost-effective option.
 
 
 
@@ -64,38 +67,40 @@ def add_assistant_message(messages, text):
 
 # NOW CREATING THE CHAT FUNCTION THAT WOULD MAKE USE OF THE ADD_MSG and ADD_ASSISTANT MSG..
 
-"""THIS line, is specific to Athropic
-def chat(messages):
-    message = client.messages.create(
-    model = model
-    max_tokens = 1000
-    messages = messages)
-    
-    return message.content[0].text"""
-
-
-# THIS WORKS FOR ONLY OPENROUTER AI
+# THIS IS THE ADAPTED CHAT FUNCTION FOR ANTHROPIC SDK
 def chat(messages, system=None, temperature=1.0, stop_sequences=None):
+    # Anthropic's messages API expects a 'system' parameter for system prompts,
+    # separate from the 'messages' list which contains user/assistant turns.
+    # If a system prompt is provided, it will be passed directly to the 'system' parameter.
+    
+    # Anthropic uses 'max_tokens' to limit the length of the generated response.
+    # The 'stop_sequences' parameter is directly supported by Anthropic.
+    
+    # Create the parameters dictionary for the Anthropic API call.
+    params = {
+        "model": model, # The specific Anthropic model to use.
+        "max_tokens": 1000, # Maximum number of tokens to generate in the response.
+        "messages": messages, # The conversation history, a list of message dictionaries.
+        "temperature": temperature # Controls the randomness of the model's output. Higher values mean more random.
+    }
+
+    # If a system prompt is provided, add it to the parameters.
     if system:
-        messages = [{"role": "system", "content": system}] + messages
-    
-    
-    
-    params = { 
-            "model": model,
-            "max_tokens" : 1000,
-            "messages" : messages,
-            "temperature" : temperature
-    }  
-    
-    if stop_sequences: # you make use of the stop_sequence once the param dictionary has being created and not after
-        params["stop"] = stop_sequences
+        params["system"] = system # Anthropic's API takes a dedicated 'system' parameter.
 
+    # If stop sequences are provided, add them to the parameters.
+    if stop_sequences:
+        params["stop_sequences"] = stop_sequences # Anthropic uses 'stop_sequences' parameter.
 
-    message = client.chat.completions.create(**params)
-
-    
-    return message.choices[0].message.content
+    try:
+        # Make the API call to Anthropic.
+        message = client.messages.create(**params)
+        # Extract and return the content of the assistant's message.
+        # Anthropic's response structure is message.content.text for text content.
+        return message.content.text
+    except Exception as e:
+        print(f"Error during Anthropic API call: {e}")
+        return "An error occurred while generating the response."
 
 
 # Dataset generating function for prompt evaluation
@@ -126,17 +131,24 @@ Please generate 3 objects.
     add_user_message(messages, prompt)
 
     # Inject a pre-filled assistant response to guide the model's generation.
-    # By forcing the model to start with "'''json", it ensures the AI begins outputting the raw data array directly
+    # By forcing the model to start with "```json", it ensures the AI begins outputting the raw data array directly
     # instead of wasting tokens on conversational text like "Sure, here is your dataset:".
-    add_assistant_message(messages, "'''json")
+    add_assistant_message(messages, "```json") # Standardizing to triple backticks for JSON block.
 
     # Send the messages payload to the LLM. The 'stop_sequences' parameter tells the model to stop generating
-    # immediately when it outputs the closing triple quotes ("'''"), preventing extra text trailing at the end.
-    text = chat(messages, stop_sequences=["'''"])
+    # immediately when it outputs the closing triple backticks ("```"), preventing extra text trailing at the end.
+    text = chat(messages, stop_sequences=["```"]) # Corrected stop sequence to triple backticks.
     
     # Strip away any leading or trailing whitespace or hidden newline characters from the model's string response.
     text = text.strip()
+    
+    if text.endswith('```'):
+        text = text[:-3].strip()
 
     # Print the final cleaned-up JSON string to the console/terminal.
     print(text)
 
+    # Convert the generated text into a json file and rename it to the variable data
+    # then return the valrable data to the function
+    return json.loads(text)
+    

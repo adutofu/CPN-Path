@@ -25,12 +25,12 @@ add_user_message(messages, prompt)
 
 # Add an assistant message that starts a JSON code block
 # This primes the AI to output its response in JSON format
-add_assistant_message(messages, "'''json")
+add_assistant_message(messages, "```json") # Standardizing to triple backticks for JSON block.
 
 
 # Send the conversation to the AI model and get the response
-# The stop_sequences parameter tells the AI to stop generating when it reaches "'''"
-text = chat(messages, stop_sequences=["'''"])
+# The stop_sequences parameter tells the AI to stop generating when it reaches "```"
+text = chat(messages, stop_sequences=["```"]) # Corrected stop sequence to triple backticks.
 # Remove any leading/trailing whitespace from the response
 text = text.strip()
 

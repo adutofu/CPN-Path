@@ -50,43 +50,31 @@ while True:
 
     add_user_message(messages, user_input)
 
-    # For getting complete stream msg with OpenRouter. it has no .stream() content manager or .text_stream
-    # You filter chunks mannually instead
-    stream = client.chat.completions.create(
-        model = model,
-        max_tokens = 1000,
-        messages = messages,
-        stream = True
-    )
-    full_response = ""
-    for chunk in stream:
-        content = chunk.choices[0].delta.content
-        if content is not None:
-            print(content, end="", flush=True)
-        full_response += content
+    # Anthropic SDK streaming:
+    # The 'with client.messages.stream' context manager handles the stream lifecycle.
+    # 'max_tokens' is used to limit the length of the generated response.
+    # 'messages' contains the conversation history.
+    # The 'system' prompt also needs to be passed to the streaming call.
+    full_response = "" # Initialize an empty string to build the full response from the stream.
+    try:
+        with client.messages.stream(
+            model=model,
+            max_tokens=1000, # Maximum number of tokens to generate in the streamed response.
+            messages=messages, # The conversation history for the stream.
+            system=system # Pass the system prompt for the streaming call.
+        ) as stream:
+            # Iterate over each text chunk received from the stream.
+            for text_chunk in stream.text_stream:
+                print(text_chunk, end="", flush=True) # Print each chunk as it arrives for a real-time effect.
+                full_response += text_chunk # Append the chunk to build the complete response.
+    except Exception as e:
+        print(f"\nError during Anthropic streaming API call: {e}")
+        full_response = "An error occurred while streaming the response."
 
     # Add the assistant's streamed response to the conversation history
     add_assistant_message(messages, full_response)
 
     print("\n")
-    print("stored message:", full_response)
-
-   
-    
-
-    answer = chat(messages, system=system, temperature=0.0)
-
-
-    # add the answer to the list of generated text
-    add_assistant_message(messages, answer)
-
-
-    print('____')
-    print(answer)
-    print('____')
-
-
-
-
-
-
+    # The full_response already contains the assistant's answer from the stream.
+    # No need for a separate chat() call here, as it would be redundant and costly.
+    # print("Stored message:", full_response) # Optional: print the stored message for debugging.
