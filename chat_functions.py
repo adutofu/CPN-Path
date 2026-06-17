@@ -166,6 +166,18 @@ def run_eval(dataset):
     return results
 
 
+def run_test_case(test_case):
+    """Calls run_propmt, then grades the result"""
+    output = run_prompt(test_case)
+
+    # TODO - replace with real grading logic
+    score = 10
+
+    return {
+        "output": output,
+        "tast_case": test_case,
+        "score": score
+    }
 
 
 
