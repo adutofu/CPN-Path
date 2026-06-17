@@ -95,12 +95,13 @@ def chat(messages, system=None, temperature=1.0, stop_sequences=None):
     try:
         # Make the API call to Anthropic.
         message = client.messages.create(**params)
-        # Extract and return the content of the assistant's message.
-        # Anthropic's response structure is message.content.text for text content.
-        return message.content.text
+        # Anthropic returns a list of content blocks. 
+        # We need to access the text field of the first block.
+        return message.content[0].text
     except Exception as e:
         print(f"Error during Anthropic API call: {e}")
-        return "An error occurred while generating the response."
+        # Return None so calling functions know the generation failed.
+        return None
 
 
 # Dataset generating function for prompt evaluation
@@ -138,6 +139,10 @@ Please generate 3 objects.
     # Send the messages payload to the LLM. The 'stop_sequences' parameter tells the model to stop generating
     # immediately when it outputs the closing triple backticks ("```"), preventing extra text trailing at the end.
     text = chat(messages, stop_sequences=["```"]) # Corrected stop sequence to triple backticks.
+
+    if text is None:
+        print("Failed to generate dataset due to API error.")
+        return []
     
     # Strip away any leading or trailing whitespace or hidden newline characters from the model's string response.
     text = text.strip()

@@ -1,0 +1,11 @@
+[
+  {
+    "task": "Write a Python function using boto3 that checks if a specific S3 bucket exists and returns a boolean value."
+  },
+  {
+    "task": "Create a JSON-formatted IAM policy statement that allows 'ec2:StopInstances' and 'ec2:StartInstances' for all resources."
+  },
+  {
+    "task": "Write a Regular Expression (Regex) to validate that a string matches the format of an AWS Account ID (exactly 12 digits)."
+  }
+]
