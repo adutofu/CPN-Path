@@ -156,33 +156,52 @@ Please generate 3 objects.
     # Convert the generated text into a json file and rename it to the variable data
     # then return the valrable data to the function
     return json.loads(text)
-    
+
+
 def run_eval(dataset):
-    """Loads the dataset and calls run_test for each test case."""
+    """
+    Evaluates a set of test cases by running each one and collecting the results.
+
+    Args:
+        dataset (list): A list of dictionaries, where each dictionary represents a test case.
+
+    Returns:
+        list: A list of dictionaries, each containing the output, original test case, and score
+              for a given test case.
+    """
     results = []
+    # Iterate through each test case in the provided dataset.
     for test_case in dataset:
+        # Execute the test case and get its result (output and score).
         result = run_test_case(test_case)
+        # Append the result of the current test case to the results list.
         results.append(result)
     return results
 
 
 def run_test_case(test_case):
-    """Calls run_propmt, then grades the result"""
+    """
+    Executes a single test case by calling the AI with the prompt and then grades the response.
+
+    Args:
+        test_case (dict): A dictionary representing a single test case, typically containing a "task".
+
+    Returns:
+        dict: A dictionary containing the AI's output, the original test case, and its assigned score.
+    """
+    # Call the run_prompt function to get the AI's response for the given test case.
     output = run_prompt(test_case)
 
     # TODO - replace with real grading logic
+    # Currently, a placeholder score of 10 is assigned. This should be replaced
+    # with actual logic to evaluate the 'output' against expected criteria.
     score = 10
 
     return {
         "output": output,
-        "tast_case": test_case,
+        "test_case": test_case, # Corrected typo from "tast_case" to "test_case".
         "score": score
     }
-
-
-
-
-
 
 # Defines the `run_prompt` function, which merges a generic prompt with a specific test case.
 # This function is designed to send a task to the AI and retrieve its solution.
@@ -210,5 +229,3 @@ please solve the following task:
     output = chat(messages)
     # Return the AI's output.
     return output
-
-
