@@ -31,8 +31,11 @@ add_assistant_message(messages, "```json") # Standardizing to triple backticks f
 # Send the conversation to the AI model and get the response
 # The stop_sequences parameter tells the AI to stop generating when it reaches "```"
 text = chat(messages, stop_sequences=["```"]) # Corrected stop sequence to triple backticks.
-# Remove any leading/trailing whitespace from the response
-text = text.strip()
 
-# Print the generated AWS CLI commands to the console
-print(text)
+if text:
+    # Remove any leading/trailing whitespace from the response
+    text = text.strip()
+    # Print the generated AWS CLI commands to the console
+    print(text)
+else:
+    print("Error: Could not retrieve a response from the AI. Please check your API credits or connection.")
