@@ -10,6 +10,11 @@ from chat_functions import chat
 # Import connection configuration and the main generation function
 from chat_functions import client, model
 from chat_functions import generate_dataset
+from chat_functions import run_eval
+from chat_functions import run_test_case
+from chat_functions import run_prompt
+from statistics import mean
+
 
 import json
 
@@ -19,5 +24,14 @@ dataset = generate_dataset()
 
 # Persist the dataset to a local JSON file. 
 # Storing the tasks allows for repeatable evaluation without re-generating data.
-with open('dataset.json', 'w') as f:
-    json.dump(dataset, f, indent=2)
+#with open('dataset.json', 'w') as f:
+    #json.dump(dataset, f, indent=2)
+
+
+
+with open("dataset.json", "r") as f:
+    dataset = json.load(f)
+
+results = run_eval(dataset)
+
+print(json.dumps(results, indent=2))

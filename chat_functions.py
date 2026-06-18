@@ -208,13 +208,19 @@ Example response shape:
     add_assistant_message(messages, "```json")
     
     # 4. Call the LLM and use a stop sequence to halt generation at the end of the JSON block.
-    eval_text = chat(messages, stop_sequences=["```"])
+    eval_text = chat(messages, stop_sequences=["```"]) # Corrected stop sequence to triple backticks.
+    
+    if eval_text is None:
+        print("Failed to get model grade due to API error.")
+        return None # Return None if chat failed
     
     # 5. Deserialize the JSON string into a structured Python dictionary.
-    return json.loads(eval_text)
-
-
-
+    try:
+        return json.loads(eval_text)
+    except json.JSONDecodeError as e:
+        print(f"Failed to parse model grade JSON: {e}")
+        print(f"Raw response: {eval_text}")
+        return None # Return None if JSON parsing failed
 
 
 def run_eval(dataset):
@@ -235,7 +241,14 @@ def run_eval(dataset):
         result = run_test_case(test_case)
         # Append the result of the current test case to the results list.
         results.append(result)
+
+    # Calculate the mathematical average (mean) of the scores extracted from all results
+    average_score = mean([result["score"] for result in results])
+    # Display the final computed average score to the console or terminal output.
+    print(f"Average score: {average_score}")
+    # Return the complete list of compiled test case results to the caller.
     return results
+
 
 
 # FUNCTION TO EXECUTE A SINGLE TEST CASE AND GRADE THE OUTPUT
@@ -252,19 +265,25 @@ def run_test_case(test_case):
     # Call the run_prompt function to get the AI's response for the given test case.
     output = run_prompt(test_case)
 
-    # TODO - replace with real grading logic
-    # Currently, a placeholder score of 10 is assigned. This should be replaced
-    # with actual logic to evaluate the 'output' against expected criteria.
-    score = model_grade["score"]
-
     # Perform the "LLM-as-a-judge" evaluation using the grader function.
     # This replaces the hardcoded placeholder with dynamic AI evaluation.
     model_grade = grade_by_model(test_case, output)
-    reasoning = model_grade["reasoning"]
+    
+    score = None
+    reasoning = "Grading failed due to API error or invalid response."
+
+    if model_grade is not None:
+        try:
+            score = model_grade.get("score")
+            reasoning = model_grade.get("reasoning")
+        except AttributeError: # model_grade might not be a dict if json.loads failed
+            score = None
+            reasoning = "Grading failed: Invalid model_grade structure."
+    else:
+        score = 0 # Assign a default low score if grading failed
 
     return {
         "output": output,
-        "test_case": test_case, # Corrected typo from "tast_case" to "test_case".
         "score": score,
         "test_case": test_case,
         "reasoning": reasoning
