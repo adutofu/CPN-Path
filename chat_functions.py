@@ -35,6 +35,14 @@ from anthropic import Anthropic # Import the Anthropic client for interacting wi
 
 from statistics import mean
 
+# Import re module stands for Regular Expressions. 
+# It is used to search, match, and manipulate text based on specific, highly flexible patterns.
+import re
+
+# The ast module stands for Abstract Syntax Tree. 
+# It allows a Python program to look at, analyze, or safely execute Python code as a structured tree data object.
+import ast
+
 # Load the API KEY from the .env file
 load_dotenv()
 
@@ -161,6 +169,9 @@ Please generate 3 objects.
     return json.loads(text)
 
 
+
+
+
 # CREATING OF THE GRADER FUNCTION & we are making use of a model grader, THAT WOULD BE USED IN THE run_eval function
 def grade_by_model(test_case, output):
     # This function implements the 'LLM-as-a-judge' pattern.
@@ -250,6 +261,55 @@ def run_eval(dataset):
     return results
 
 
+# Syntax Validation Function in line with CODE BASED GRADING: To check if
+# generated code has valid syntax, you can create three helper functions that attempts to parse the output.
+def validate_json(text):
+    try:
+        # Attempt to parse the stripped text string into a valid Python dictionary/list.
+        json.loads(text.strip())
+        # Return a perfect score of 10 if the JSON syntax is entirely valid.
+        return 10
+    except json.JSONDecodeError:
+        # Return a score of 0 if a parsing error occurs due to invalid JSON formatting.
+        return 0
+    
+def validate_python(text):
+    try:
+        # Parse the stripped string into an Abstract Syntax Tree to check for valid Python syntax.
+        ast.parse(text.strip())
+        # Return a perfect score of 10 if the string compiles as valid, executable Python code.
+        return 10
+    except SyntaxError:
+        # Return a score of 0 if the code contains syntax violations or formatting errors.
+        return 0
+
+def validate_regex(text):
+    try:
+        # Attempt to compile the stripped string into a regular expression pattern object.
+        re.compile(text.strip())
+        # Return a perfect score of 10 if the string forms a valid regular expression pattern.
+        return 10
+    except re.error:
+        # Return a score of 0 if the string contains a malformed or invalid regular expression.
+        return 0
+
+def grade_syntax(response, test_case):
+    # Extract the expected target format constraints from the specific evaluation test case.
+    format = test_case["format"]
+
+    # Check if the required output structure should be validated as JSON
+    if format == "json":
+        return validate_json(response)
+    
+    # Check if the required output structure should be validated as standard Python code
+    elif format == "python":
+        return validate_python(response)
+    
+    # Default to verifying the string against regular expression rules if no other formats match.
+    else:
+        return validate_regex(response)
+    
+    
 
 # FUNCTION TO EXECUTE A SINGLE TEST CASE AND GRADE THE OUTPUT
 def run_test_case(test_case):
