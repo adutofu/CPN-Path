@@ -1,11 +1,17 @@
 [
   {
-    "task": "Write a Python function using boto3 that checks if a specific S3 bucket exists and returns a boolean value."
+    "task": "Write a Python function using boto3 that checks if a specific S3 bucket exists and returns a boolean value.",
+    "format": "python",
+    "solution_criteria": "The solution must compile without SyntaxError using ast.parse. It must explicitly import and use boto3.client('s3') or boto3.resource('s3'), attempt to invoke head_bucket() or load(), handle botocore.exceptions.ClientError properly, and return a strict boolean value (True if the bucket exists, False otherwise)."
   },
   {
-    "task": "Create a JSON-formatted IAM policy statement that allows 'ec2:StopInstances' and 'ec2:StartInstances' for all resources."
+    "task": "Create a JSON-formatted IAM policy statement that allows 'ec2:StopInstances' and 'ec2:StartInstances' for all resources.",
+    "format": "json",
+    "solution_criteria": "The output must be a valid JSON string parseable by json.loads. The structure must include a 'Statement' block (or array) containing 'Effect': 'Allow', 'Resource': '*', and an 'Action' array containing exactly ['ec2:StopInstances', 'ec2:StartInstances']. If a full policy is provided, the 'Version' field must strictly equal '2012-10-17'."
   },
   {
-    "task": "Write a Regular Expression (Regex) to validate that a string matches the format of an AWS Account ID (exactly 12 digits)."
+    "task": "Write a Regular Expression (Regex) to validate that a string matches the format of an AWS Account ID (exactly 12 digits).",
+    "format": "regex",
+    "solution_criteria": "The pattern must compile without error using re.compile. To prevent false partial matches, it must use strict string anchors like '^\\d{12}$' or '\\A\\d{12}\\Z'. It must return a match object for valid 12-digit numeric strings (e.g., '123456789012') and return None for non-numeric, shorter, or longer inputs."
   }
 ]

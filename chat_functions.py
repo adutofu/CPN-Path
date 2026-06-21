@@ -127,6 +127,8 @@ Example output:
 [
     {
         "task": "Description of task",
+        "format": "json" or "python" or "regex"
+        "solution_criteria" "Key criteria for evaluating the solution"
     },
     ...additional
 ]
@@ -192,6 +194,12 @@ AI Generated Solution:
 <solution>
 {output}
 </solution>
+
+Solution Criteria to be used to evaluate it:
+<criteria>
+{test_case["solution_criteria"]}
+</criteria>
+
 
 Output Format
 Provide your evaluation as a structured JSON object with the following fields, in this specific order:
@@ -309,7 +317,7 @@ def grade_syntax(response, test_case):
     else:
         return validate_regex(response)
     
-    
+
 
 # FUNCTION TO EXECUTE A SINGLE TEST CASE AND GRADE THE OUTPUT
 def run_test_case(test_case):
