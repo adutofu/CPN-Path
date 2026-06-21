@@ -109,11 +109,247 @@ def chat(messages, system=None, temperature=1.0, stop_sequences=None):
         # Anthropic returns a list of content blocks. 
         # We need to access the text field of the first block.
         return message.content[0].text
+    
     except Exception as e:
         print(f"Error during Anthropic API call: {e}")
         # Return None so calling functions know the generation failed.
         return None
 
+
+# function for buildeing a report from the prompt evaluation and grading process
+
+# Report Builder
+def generate_prompt_evaluation_report(evaluation_results):
+    """
+    Generates a structured, self-contained HTML report document detailing 
+    the summary metrics and fine-grained results of a prompt evaluation run.
+    """
+    # -------------------------------------------------------------------------
+    # 1. SUMMARY METRICS CALCULATION
+    # -------------------------------------------------------------------------
+    
+    # Capture the total count of test cases evaluated to determine dataset scale.
+    total_tests = len(evaluation_results)
+    
+    # Extract just the raw numerical score integers from every evaluation dictionary.
+    scores = [result["score"] for result in evaluation_results]
+    
+    # Calculate the mathematical mean score across all items; default to 0 if the list is completely empty.
+    avg_score = mean(scores) if scores else 0
+    
+    # Establish a constant upper boundary for the grading scale to contextualize scores (e.g., /10).
+    max_possible_score = 10
+    
+    # Determine the project's quality pass rate by filtering for scores >= 7,
+    # converting it into a percentage, and safeguarding against division-by-zero errors.
+    pass_rate = (
+        100 * len([s for s in scores if s >= 7]) / total_tests if total_tests else 0
+    )
+
+    # -------------------------------------------------------------------------
+    # 2. HTML STRUCTURE AND INLINE CSS STYLING LAYOUT
+    # -------------------------------------------------------------------------
+    
+    # Initialize a multi-line HTML string buffer, embedding standard responsive CSS
+    # layouts to handle styling, flexbox grids, table structures, and code coloring.
+    html = f"""
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Prompt Evaluation Report</title>
+        <style>
+            body {{
+                font-family: Arial, sans-serif;
+                line-height: 1.6;
+                margin: 0;
+                padding: 20px;
+                color: #333;
+            }}
+            .header {{
+                background-color: #f0f0f0;
+                padding: 20px;
+                border-radius: 5px;
+                margin-bottom: 20px;
+            }}
+            .summary-stats {{
+                display: flex;
+                justify-content: space-between;
+                flex-wrap: wrap;
+                gap: 10px;
+            }}
+            .stat-box {{
+                background-color: #fff;
+                border-radius: 5px;
+                padding: 15px;
+                box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+                flex-basis: 30%;
+                min-width: 200px;
+            }}
+            .stat-value {{
+                font-size: 24px;
+                font-weight: bold;
+                margin-top: 5px;
+            }}
+            table {{
+                width: 100%;
+                border-collapse: collapse;
+                margin-top: 20px;
+            }}
+            th {{
+                background-color: #4a4a4a;
+                color: white;
+                text-align: left;
+                padding: 12px;
+            }}
+            td {{
+                padding: 10px;
+                border-bottom: 1px solid #ddd;
+                vertical-align: top;
+            }}
+            tr:nth-child(even) {{
+                background-color: #f9f9f9;
+            }}
+            .output-cell {{
+                white-space: pre-wrap;
+            }}
+            .score {{
+                font-weight: bold;
+                padding: 5px 10px;
+                border-radius: 3px;
+                display: inline-block;
+            }}
+            .score-high {{
+                background-color: #c8e6c9;
+                color: #2e7d32;
+            }}
+            .score-medium {{
+                background-color: #fff9c4;
+                color: #f57f17;
+            }}
+            .score-low {{
+                background-color: #ffcdd2;
+                color: #c62828;
+            }}
+            .output {{
+                overflow: auto;
+                white-space: pre-wrap;
+            }}
+
+            .output pre {{
+                background-color: #f5f5f5;
+                border: 1px solid #ddd;
+                border-radius: 4px;
+                padding: 10px;
+                margin: 0;
+                font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+                font-size: 14px;
+                line-height: 1.4;
+                color: #333;
+                box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+                overflow-x: auto;
+                white-space: pre-wrap; 
+                word-wrap: break-word; 
+            }}
+
+            td {{
+                width: 20%;
+            }}
+            .score-col {{
+                width: 80px;
+            }}
+        </style>
+    </head>
+    <body>
+        <div class="header">
+            <h1>Prompt Evaluation Report</h1>
+            <div class="summary-stats">
+                <div class="stat-box">
+                    <div>Total Test Cases</div>
+                    <div class="stat-value">{total_tests}</div>
+                </div>
+                <div class="stat-box">
+                    <div>Average Score</div>
+                    <div class="stat-value">{avg_score:.1f} / {max_possible_score}</div>
+                </div>
+                <div class="stat-box">
+                    <div>Pass Rate (≥7)</div>
+                    <div class="stat-value">{pass_rate:.1f}%</div>
+                </div>
+            </div>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Scenario</th>
+                    <th>Prompt Inputs</th>
+                    <th>Solution Criteria</th>
+                    <th>Output</th>
+                    <th>Score</th>
+                    <th>Reasoning</th>
+                </tr>
+            </thead>
+            <tbody>
+    """
+
+    # -------------------------------------------------------------------------
+    # 3. DYNAMIC ROW PROCESSING & CONTENT GENERATION LOOP
+    # -------------------------------------------------------------------------
+    
+    # Iterate through each structured evaluation dictionary inside our input results array.
+    for result in evaluation_results:
+        
+        # Unpack the prompt_inputs nested dictionary. We use a list comprehension to transform
+        # each key-value attribute map into a bold tag string segment, then join them with HTML line breaks.
+        prompt_inputs_html = "<br>".join(
+            [
+                f"<strong>{key}:</strong> {value}"
+                for key, value in result["test_case"]["prompt_inputs"].items()
+            ]
+        )
+
+        # Process the solution_criteria list. It joins the criteria array strings with an internal line break
+        # accompanied by a structural list bullet marker (•) to display the evaluation rules neatly.
+        criteria_string = "<br>• ".join(result["test_case"]["solution_criteria"])
+
+        # Determine semantic color thresholds: Check the test item score to assign the appropriate CSS class.
+        score = result["score"]
+        if score >= 8:
+            score_class = "score-high"     # High quality threshold match -> Applies a solid green accent badge.
+        elif score <= 5:
+            score_class = "score-low"      # Syntax fail/Severe risk deviation -> Applies a warning red accent badge.
+        else:
+            score_class = "score-medium"   # Intermediate / Partial completion -> Applies a warning yellow accent badge.
+
+        # Append a populated HTML table row string template block directly to our main data table container body.
+        # Uses the pre-formatted variables and extracts raw string variables like scenario and output parameters.
+        html += f"""
+            <tr>
+                <td>{result["test_case"]["scenario"]}</td>
+                <td class="prompt-inputs">{prompt_inputs_html}</td>
+                <td class="criteria">• {criteria_string}</td>
+                <td class="output"><pre>{result["output"]}</pre></td>
+                <td class="score-col"><span class="score {score_class}">{score}</span></td>
+                <td class="reasoning">{result["reasoning"]}</td>
+            </tr>
+        """
+
+    # -------------------------------------------------------------------------
+    # 4. STRUCTURAL CONCATENATION AND RETURN
+    # -------------------------------------------------------------------------
+    
+    # Close out the remaining open structural table container body tags and end the HTML string stream.
+    html += """
+            </tbody>
+        </table>
+    </body>
+    </html>
+    """
+
+    # Return the completely processed, monolithic HTML string buffer back to the calling function module.
+    return html
 
 # Dataset generating function for prompt evaluation
 def generate_dataset():
