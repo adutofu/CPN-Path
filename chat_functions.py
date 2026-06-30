@@ -301,16 +301,24 @@ def generate_prompt_evaluation_report(evaluation_results):
         
         # Unpack the prompt_inputs nested dictionary. We use a list comprehension to transform
         # each key-value attribute map into a bold tag string segment, then join them with HTML line breaks.
-        prompt_inputs_html = "<br>".join(
-            [
-                f"<strong>{key}:</strong> {value}"
-                for key, value in result["test_case"]["prompt_inputs"].items()
-            ]
-        )
+        prompt_inputs = result["test_case"].get("prompt_inputs")
++        if prompt_inputs and isinstance(prompt_inputs, dict):
++            prompt_inputs_html = "<br>".join(
++                [f"<strong>{key}:</strong> {value}" for key, value in prompt_inputs.items()]
++            )
++        else:
++            prompt_inputs_html = "N/A"
 
         # Process the solution_criteria list. It joins the criteria array strings with an internal line break
         # accompanied by a structural list bullet marker (•) to display the evaluation rules neatly.
-        criteria_string = "<br>• ".join(result["test_case"]["solution_criteria"])
+        
+        criteria = result["test_case"].get("solution_criteria")
+        if criteria and isinstance(criteria, list) and len(criteria) > 0:
+            # Add bullet marker to the first item for clean formatting
+            criteria_string = "<br>• ".join([str(c) for c in criteria])
+        else:
+            criteria_string = "N/A"
+
 
         # Determine semantic color thresholds: Check the test item score to assign the appropriate CSS class.
         score = result["score"]
@@ -492,9 +500,9 @@ class PromptEvaluator():
         # Establish the context blueprint dict mapping our inputs to the customer template keys
 
         content = {
-            "task": test_case["task"],
-            "solution": output,
-            "criteria": test_case["solution_criteria"],
+            'test_case["task"]': test_case["task"],
+            "output": output,
+            'test_case["solution_criteria"]': test_case["solution_criteria"],
         }
 
         eval_prompt = self.render(eval_template, content)
@@ -631,7 +639,7 @@ class PromptEvaluator():
         
         # Step 4: Run our object-oriented LLM-as-a-judge evaluator method using the 'self' keyword.
         # This executes the handshake, passing our test parameters and fresh text responses.
-        model_grade = self.grade_by_model(self, test_case, output)
+        model_grade = self.grade_by_model(test_case, output)
 
         # Step 5: Establish runtime safety defaults in case our model grader runs into API failures
         score = 0

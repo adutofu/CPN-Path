@@ -14,7 +14,7 @@ from chat_functions import chat
 from chat_functions import client, model
 
 # IMPORT the promt evaluation pipeline functions
-from chat_functions import run_eval, run_test_case, run_prompt
+from chat_functions import PromptEvaluator, run_prompt
 
 
 import json
@@ -98,6 +98,7 @@ print('__' * 125)
 with open('dataset.json', 'r') as f:
     dataset = json.load(f)
 
-results = run_eval(dataset)
+evaluator = PromptEvaluator()
+results = evaluator.run_eval(dataset)
 
 print(json.dumps(results, indent=2))
